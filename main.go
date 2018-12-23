@@ -10,46 +10,45 @@ import (
 	"golang.org/x/image/colornames"
 )
 
+const (
+	twoPi = math.Pi * 2.0
+)
+
 var (
 	startTime = time.Now()
 	tid       = 0.0
+	bounds    pixel.Rect
 )
 
-func lissajous(bounds pixel.Rect) *imdraw.IMDraw {
+func lissajous() *imdraw.IMDraw {
 	const (
-		cycles = 5
-		res    = 0.1
+		cycles = 1
+		period = cycles * twoPi
 		ext    = 2.0
 	)
 
+	res := period / (200.0*sinPos(tid*twoPi*0.1) + 10)
 	hw := (bounds.Max.X - bounds.Min.X) / 2
 	hh := (bounds.Max.Y - bounds.Min.Y) / 2
+
 	imd := imdraw.New(nil)
 	imd.Color = colornames.Green
 	imd.EndShape = imdraw.RoundEndShape
 
-	freq := 4.0
+	freq := 9.0
 	phase := tid
 
-	var prev *pixel.Vec
-	for t := 0.0; t < cycles*math.Pi*2.0; t += res {
-		x := math.Sin(freq*t + phase)
+	for t := 0.0; t <= period; t += res {
+		x := math.Sin(t + phase)
 		y := math.Sin(freq*t + phase + ext)
 
 		sx := bounds.Min.X + hw + (hw * x)
 		sy := bounds.Min.Y + hh + (hh * y)
 
-		if prev == nil {
-			prev = new(pixel.Vec)
-			*prev = pixel.V(sx, sy)
-		} else {
-			curr := pixel.V(sx, sy)
-			imd.Push(*prev, curr)
-			*prev = curr
-		}
+		imd.Push(pixel.V(sx, sy))
 	}
 
-	imd.Line(30)
+	imd.Line(3)
 	return imd
 }
 
@@ -65,11 +64,13 @@ func run() {
 		panic(err)
 	}
 
-	win.Clear(colornames.Skyblue)
+	bounds = win.Bounds()
 
 	for !win.Closed() {
+		win.Clear(colornames.Skyblue)
+
 		tid = time.Now().Sub(startTime).Seconds()
-		liss := lissajous(win.Bounds())
+		liss := lissajous()
 		liss.Draw(win)
 
 		win.Update()
@@ -78,4 +79,8 @@ func run() {
 
 func main() {
 	pixelgl.Run(run)
+}
+
+func sinPos(x float64) float64 {
+	return math.Sin(x)*0.5 + 0.5
 }
