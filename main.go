@@ -1,7 +1,9 @@
 package main
 
 import (
+	"log"
 	"math"
+	"os"
 	"time"
 
 	"github.com/hexhacks/pixop/cmd/lissajous"
@@ -9,6 +11,9 @@ import (
 
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
+
+	"github.com/urfave/cli"
+
 	"golang.org/x/image/colornames"
 )
 
@@ -18,27 +23,61 @@ const (
 
 var (
 	drawFunc func(*pixelgl.Window)
+
+	width  uint
+	height uint
 )
 
 func main() {
-	drawFunc = lissajous.Draw
+	app := cli.NewApp()
+	app.Name = "pixop"
 
-	pixelgl.Run(run)
+	app.Flags = []cli.Flag{
+		cli.UintFlag{
+			Name:        "width, x",
+			Value:       1024,
+			Usage:       "hidth of the window",
+			Destination: &width,
+		},
+		cli.UintFlag{
+			Name:        "height, y",
+			Value:       768,
+			Usage:       "height of the window",
+			Destination: &height,
+		},
+	}
+
+	app.Commands = []cli.Command{
+		{
+			Name:  "lissajous",
+			Usage: "draw a sinusoidal pattern",
+			Action: func(c *cli.Context) error {
+				drawFunc = lissajous.Draw
+				pixelgl.Run(run)
+				return nil
+			},
+		},
+	}
+
+	err := app.Run(os.Args)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func run() {
+	global.Bounds = pixel.R(0, 0, float64(width), float64(height))
+
 	cfg := pixelgl.WindowConfig{
 		Title:  "Jacob <3 Ulrika",
-		Bounds: pixel.R(0, 0, 1024, 768),
+		Bounds: global.Bounds,
 		VSync:  true,
 	}
 
 	win, err := pixelgl.NewWindow(cfg)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
-
-	global.Bounds = win.Bounds()
 
 	for !win.Closed() {
 		calcTime()
