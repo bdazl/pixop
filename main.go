@@ -6,6 +6,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/hexhacks/pixop/cmd"
+	"github.com/hexhacks/pixop/cmd/koch"
 	"github.com/hexhacks/pixop/cmd/lissajous"
 	"github.com/hexhacks/pixop/global"
 
@@ -22,7 +24,7 @@ const (
 )
 
 var (
-	drawFunc func(*pixelgl.Window)
+	scene cmd.Scene
 
 	width  uint
 	height uint
@@ -52,7 +54,16 @@ func main() {
 			Name:  "lissajous",
 			Usage: "draw a sinusoidal pattern",
 			Action: func(c *cli.Context) error {
-				drawFunc = lissajous.Draw
+				scene = lissajous.New()
+				pixelgl.Run(run)
+				return nil
+			},
+		},
+		{
+			Name:  "koch",
+			Usage: "draw a koch snowflake",
+			Action: func(c *cli.Context) error {
+				scene = koch.New()
 				pixelgl.Run(run)
 				return nil
 			},
@@ -79,12 +90,17 @@ func run() {
 		log.Fatal(err)
 	}
 
+	err = scene.Setup()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	for !win.Closed() {
 		calcTime()
 
 		win.Clear(colornames.Skyblue)
 
-		drawFunc(win)
+		scene.Draw(win)
 
 		win.Update()
 	}

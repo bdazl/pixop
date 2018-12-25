@@ -13,7 +13,18 @@ import (
 	"golang.org/x/image/colornames"
 )
 
-func Draw(win *pixelgl.Window) {
+type Lissajous struct {
+}
+
+func New() *Lissajous {
+	return &Lissajous{}
+}
+
+func (Lissajous) Setup() error {
+	return nil
+}
+
+func (Lissajous) Draw(win *pixelgl.Window) {
 	fig := lissajous()
 
 	fig.Draw(win)
