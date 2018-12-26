@@ -14,7 +14,4 @@ var (
 
 	// Window bounds
 	Bounds pixel.Rect
-
-	// Window mid point
-	Midpoint pixel.Vec
 )
