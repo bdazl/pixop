@@ -7,7 +7,9 @@ require (
 	github.com/go-gl/gl v0.0.0-20181026044259-55b76b7df9d2 // indirect
 	github.com/go-gl/glfw v0.0.0-20181213070059-819e8ce5125f // indirect
 	github.com/go-gl/mathgl v0.0.0-20180804195959-cdf14b6b8f8a // indirect
+	github.com/lucasb-eyer/go-colorful v0.0.0-20181028223441-12d3b2882a08
 	github.com/pkg/errors v0.8.0 // indirect
+	github.com/stretchr/testify v1.3.0
 	github.com/urfave/cli v1.20.0
 	golang.org/x/image v0.0.0-20181116024801-cd38e8056d9b
 )
