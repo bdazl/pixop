@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/hexhacks/pixop/cmd"
+	"github.com/hexhacks/pixop/cmd/epicycles"
 	"github.com/hexhacks/pixop/cmd/koch"
 	"github.com/hexhacks/pixop/cmd/lissajous"
 	"github.com/hexhacks/pixop/global"
@@ -68,6 +69,15 @@ func main() {
 				return nil
 			},
 		},
+		{
+			Name:  "epicycles",
+			Usage: "computes and draws epicycles",
+			Action: func(c *cli.Context) error {
+				scene = epicycles.New()
+				pixelgl.Run(run)
+				return nil
+			},
+		},
 	}
 
 	err := app.Run(os.Args)
@@ -80,7 +90,7 @@ func run() {
 	global.Bounds = pixel.R(0, 0, float64(width), float64(height))
 
 	cfg := pixelgl.WindowConfig{
-		Title:  "Jacob <3 Ulrika",
+		Title:  "Pixop",
 		Bounds: global.Bounds,
 		VSync:  true,
 	}
