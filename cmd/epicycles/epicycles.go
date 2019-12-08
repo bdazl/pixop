@@ -55,7 +55,7 @@ func (e *Epicycles) Circ(r float64, v pixel.Vec) {
 	e.circle.Draw(e.win)
 }
 
-func GenerateCurve(
+func generateCurve(
 	count int,
 	thickness float64,
 	closed bool,
