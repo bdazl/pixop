@@ -6,79 +6,103 @@ import (
 	"github.com/faiface/pixel/pixelgl"
 
 	"github.com/lucasb-eyer/go-colorful"
-
-	"github.com/hexhacks/pixop/global"
-
-	"image/color"
 )
 
 const (
 	unit = 100.0
+
+	particleCount = 10
 )
 
-type Epicycles struct {
+type Gem struct {
 	circle *imdraw.IMDraw // unit circle
 	win    *pixelgl.Window
+	particles
 }
 
-func New() *Epicycles {
+// many particles
+type particles struct {
+	pos  []pixel.Vec
+	vel  []pixel.Vec
+	mass []float64
+}
+
+func (p *particles) Pos(f func(int, *pixel.Vec)) {
+	for i, ps := range p.pos {
+		f(i, &ps)
+		p.pos[i] = ps
+	}
+}
+
+func (p *particles) Vel(f func(int, *pixel.Vec)) {
+	for i, v := range p.vel {
+		f(i, &v)
+	}
+}
+
+func (p *particles) Mass(f func(int, *float64)) {
+	for i, m := range p.mass {
+		f(i, &m)
+	}
+}
+
+func (p *particles) Draw(g *Gem) {
+	p.Pos(func(i int, p *pixel.Vec) {
+		g.Circ(5, p)
+	})
+}
+
+func New() *Gem {
+	const (
+		// estimate screen size
+		w = 1024
+		h = 800
+	)
 	circle := imdraw.New(nil)
 	circle.Color = colorful.HappyColor()
 	circle.Push(pixel.V(0, 0))
-	circle.Circle(unit, 3)
+	circle.Circle(unit, 0)
 
-	return &Epicycles{circle: circle}
+	gem := &Gem{
+		circle: circle,
+		particles: particles{
+			pos:  make([]pixel.Vec, particleCount),
+			vel:  make([]pixel.Vec, particleCount),
+			mass: make([]float64, particleCount),
+		},
+	}
+
+	parts := &gem.particles
+
+	parts.Pos(func(i int, v *pixel.Vec) {
+		base := ((i + 100) * i * i * i)
+		v.X = float64(base % w)
+		v.Y = float64(base % h)
+	})
+
+	return gem
 }
 
-func (e *Epicycles) Setup() error {
+func (g *Gem) Setup() error {
 	return nil
 }
 
-func (e *Epicycles) Draw(win *pixelgl.Window) {
-	var (
+func (g *Gem) Draw(win *pixelgl.Window) {
+	/*var (
 		bounds = global.Bounds
 		center = bounds.Center()
-	)
-	e.win = win
+	)*/
+	g.win = win
 
-	e.Circ(unit, center)
-	e.Circ(unit*2, pixel.V(100, 100))
+	g.particles.Draw(g)
 }
 
-func (e *Epicycles) Circ(r float64, v pixel.Vec) {
+func (g *Gem) Circ(r float64, v *pixel.Vec) {
 	scal := r / unit
 	mat := pixel.IM
 	mat = mat.ScaledXY(pixel.ZV, pixel.V(scal, scal))
-	mat = mat.Moved(v)
+	mat = mat.Moved(*v)
 
-	e.win.SetMatrix(mat)
-	e.circle.Draw(e.win)
-}
-
-func generateCurve(
-	count int,
-	thickness float64,
-	closed bool,
-	curve func(int) (*pixel.Vec, color.Color)) *imdraw.IMDraw {
-
-	imd := imdraw.New(nil)
-	imd.EndShape = imdraw.RoundEndShape
-
-	for i := 0; i < count; i++ {
-		PushPoint(i, imd, curve)
-	}
-
-	if closed {
-		PushPoint(0, imd, curve)
-	}
-
-	imd.Line(thickness)
-	return imd
-}
-
-func PushPoint(i int, imd *imdraw.IMDraw, curve func(int) (*pixel.Vec, color.Color)) {
-	vec, col := curve(i)
-
-	imd.Color = col
-	imd.Push(*vec)
+	g.win.SetMatrix(mat)
+	g.circle.Draw(g.win)
 }
