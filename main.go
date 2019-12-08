@@ -8,6 +8,7 @@ import (
 
 	"github.com/hexhacks/pixop/cmd"
 	"github.com/hexhacks/pixop/cmd/epicycles"
+	"github.com/hexhacks/pixop/cmd/gem"
 	"github.com/hexhacks/pixop/cmd/koch"
 	"github.com/hexhacks/pixop/cmd/lissajous"
 	"github.com/hexhacks/pixop/global"
@@ -74,6 +75,15 @@ func main() {
 			Usage: "computes and draws epicycles",
 			Action: func(c *cli.Context) error {
 				scene = epicycles.New()
+				pixelgl.Run(run)
+				return nil
+			},
+		},
+		{
+			Name:  "gem",
+			Usage: "gejm time!",
+			Action: func(c *cli.Context) error {
+				scene = gem.New()
 				pixelgl.Run(run)
 				return nil
 			},
